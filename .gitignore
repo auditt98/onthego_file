@@ -1,0 +1,79 @@
+# Dependency directories
+node_modules/
+bower_components/
+
+# Build outputs
+/build
+/dist
+/out
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debugging files
+*.ndb
+
+# Production files
+/public
+
+# Optional npm cache & logs
+.npm
+.npmrc
+.npm-debug.log*
+
+# Optional eslint cache
+.eslintcache
+
+# Optional: MacOS Finder folder custom view settings file
+.DS_Store
+
+# Optional: Yarn Integrity file
+.yarn-integrity
+
+# Optional: Parcel cache directory
+.cache
+
+# Optional: Next.js build output
+.next
+
+# Optional: Nuxt.js build output
+.nuxt
+
+# Optional: Gatsby files
+.cache/
+/public
+
+# Optional: Storybook build output
+/storybook-out
+
+# Optional: Bit components
+.bit
+
+# Optional: Coverage directory used by tools like istanbul
+coverage/
