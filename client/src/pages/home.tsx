@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Box, Flex, Section, Text } from "@radix-ui/themes";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import BackgroundCanvas from "../components/BackgroundCanvas";
-
+import Peer from "../components/Peer";
 const WS_URL = "ws://localhost:8080/ws/_default";
 
 const CONN_STATUSES = {
@@ -19,23 +19,31 @@ function Home() {
   const { sendMessage, lastMessage, readyState } = useWebSocket(WS_URL);
   const [selfName, setSelfName] = useState("" as string);
   const [selfId, setSelfId] = useState("" as string);
+  const [clients, setClients] = useState([] as any[]);
+
   const [messageHistory, setMessageHistory] = useState([] as any[]);
   const connectionStatus = useMemo(
     () => CONN_STATUSES[readyState],
     [readyState]
   );
 
-  useEffect(() => {
+  const handleWSMessages = useCallback(() => {
     if (lastMessage !== null) {
-      console.log("lastMessage", lastMessage);
       const parsedData = JSON.parse(lastMessage.data);
       if (parsedData.type === "noti_self_client") {
         setSelfName(parsedData.data.name);
         setSelfId(parsedData.data.id);
       }
+      if (parsedData.type === "noti_all_client") {
+        setClients(parsedData.data);
+      }
       setMessageHistory((prev) => prev.concat(lastMessage));
     }
-  }, [lastMessage, setMessageHistory]);
+  }, [lastMessage]);
+
+  useEffect(() => {
+    handleWSMessages();
+  }, [handleWSMessages]);
 
   return (
     <Box
@@ -43,7 +51,6 @@ function Home() {
       style={{
         backgroundColor: "transparent",
         borderRadius: "var(--radius-3)",
-        height: "100%",
       }}
     >
       <BackgroundCanvas loading={true}></BackgroundCanvas>
@@ -52,12 +59,15 @@ function Home() {
           <Text>Status: {connectionStatus}</Text>
         </Flex>
       </Section>
-      {lastMessage ? <span>Last message: {lastMessage.data}</span> : null}
-      <ul>
-        {messageHistory.map((message, idx) => (
-          <span key={idx}>{message ? message.data : null}</span>
-        ))}
-      </ul>
+
+      <Section>
+        <Flex justify={"center"} gap="9" wrap={"wrap"} width={"100%"}>
+          {clients.map((client, index) => (
+            <Peer client={client}></Peer>
+          ))}
+        </Flex>
+      </Section>
+
       <Section
         size="1"
         style={{
@@ -71,9 +81,18 @@ function Home() {
       >
         <Flex direction={"column"} justify={"center"} align={"center"} pb={"5"}>
           <img width={80} height={80} src={"/assets/logo.png"}></img>
-					{selfName && <div>You are known as <span style={{
-						color: "#2870BD"
-					}}>{selfName}</span></div>}
+          {selfName && (
+            <div>
+              You are known as {' '}
+              <span
+                style={{
+                  color: "#2870BD",
+                }}
+              >
+                {selfName}
+              </span>
+            </div>
+          )}
         </Flex>
       </Section>
     </Box>

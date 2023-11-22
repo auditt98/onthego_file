@@ -70,7 +70,7 @@ const BackgroundCanvas = ({ loading }) => {
         zIndex: -1,
         top: 0,
         left: 0,
-        background: "#EEEEEE",
+        background: "#faf8f8",
       }}
     />
   );

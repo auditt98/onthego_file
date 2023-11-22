@@ -9,17 +9,62 @@ const clients = {};
 
 wss.on("connection", function connection(ws) {
   const clientId = uuidv4();
+  const clientName = generateClientName();
+  ws.clientId = clientId;
+  ws.clientName = clientName;
+  ws.on("close", function close(code) {
+    delete clients[clientId];
+    const updateClientMessage = {
+      type: "noti_all_client",
+      data: [],
+    };
+    for (const key in clients) {
+      if (Object.hasOwn(clients, key) && key !== clientId) {
+        const client = clients[key];
+        updateClientMessage.data.push({
+          id: client.id,
+          name: client.name,
+        });
+      }
+    }
+    wss.clients.forEach((client) => {
+      if (client.readyState === Websocket.OPEN) {
+        const newData = updateClientMessage.data.filter((item) => item.id !== client.clientId);
+        client.send(JSON.stringify({
+          type: "noti_all_client",
+          data: newData,
+        }));
+      }
+    });
+  });
+
   const data = {
     id: clientId,
-    name: generateClientName(),
+    name: clientName,
     ws: ws,
   };
   clients[clientId] = data;
+
+  handleNotifyAllClients(clientId);
+  handleNotifySelf(data.id, data.name, ws);
+});
+
+function handleNotifySelf(id, name, ws) {
+  const selfMessage = {
+    type: "noti_self_client",
+    data: {
+      id: id,
+      name: name,
+    },
+  };
+  ws.send(JSON.stringify(selfMessage));
+}
+
+function handleNotifyAllClients() {
   const message = {
     type: "noti_all_client",
     data: [],
   };
-  //loop through clients attribute, add each client to message.data, remove the ws attribute
   for (const key in clients) {
     if (Object.hasOwn(clients, key)) {
       const client = clients[key];
@@ -29,26 +74,16 @@ wss.on("connection", function connection(ws) {
       });
     }
   }
-
-  const selfMessage = {
-    type: "noti_self_client",
-    data: {
-      id: data.id,
-      name: data.name,
-    },
-  };
-
   wss.clients.forEach((client) => {
     if (client.readyState === Websocket.OPEN) {
-      client.send(JSON.stringify(message));
+      const newData = message.data.filter((item) => item.id !== client.clientId);
+      client.send(JSON.stringify({
+        type: "noti_all_client",
+        data: newData,
+      }));
     }
   });
-  ws.send(JSON.stringify(selfMessage));
-});
-
-wss.on("close", function close() {
-  console.log("disconnected");
-});
+}
 
 function generateClientName() {
   const adjectives = [
