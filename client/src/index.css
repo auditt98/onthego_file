@@ -1,8 +1,41 @@
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   border-radius: 0px !important;
+  font-family: monospace;
 }
 body {
   margin: 0;
   border-radius: 0px !important;
+  font-family: monospace;
+}
+
+.Overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.button__cancel {
+  padding: 10px 20px;
+  border-radius: 5px;
+  background-color: white;
+  color: black;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  margin: 5px;
+  cursor: pointer;
+}
+
+.button__send {
+  padding: 10px 20px;
+  border-radius: 5px;
+  background-color: #2870bd;
+  color: white;
+  border: 1px solid #2870bd;
+  margin: 5px;
+  cursor: pointer;
 }
