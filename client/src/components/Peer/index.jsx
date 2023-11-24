@@ -1,8 +1,9 @@
-import { Flex, Dialog, Button, TextField } from "@radix-ui/themes";
+import { Flex, TextField } from "@radix-ui/themes";
 import IconDesktop from "../IconDesktop";
 import Modal from "react-modal";
 import { useState } from "react";
 import { useFilePicker } from "use-file-picker";
+import { useLongPress } from "use-long-press";
 import "./Peer.css";
 
 const customStyles = {
@@ -23,18 +24,21 @@ const Peer = ({ client, onTextSend, onFileSend }) => {
   const [text, setText] = useState("");
   const [files, setFiles] = useState([]);
 
-  const { openFilePicker, filesContent, loading, errors, clear } =
-    useFilePicker({
-      readAs: "DataURL",
-      accept: "*",
-      multiple: true,
-      validators: [],
-      readFilesContent: false,
-      onFilesSelected: (data) => {
-        console.log("data", data.plainFiles);
-        setFiles(data?.plainFiles);
-      },
-    });
+  const longPressBinder = useLongPress(() => {
+    setOpenTextModal(true);
+  });
+
+  const { openFilePicker, clear } = useFilePicker({
+    readAs: "DataURL",
+    accept: "*",
+    multiple: true,
+    validators: [],
+    readFilesContent: false,
+    onFilesSelected: (data) => {
+      console.log("data", data.plainFiles);
+      setFiles(data?.plainFiles);
+    },
+  });
 
   const handlePeerClick = (e) => {
     if (e.type === "click") {
@@ -56,6 +60,7 @@ const Peer = ({ client, onTextSend, onFileSend }) => {
         onClick={(e) => {
           handlePeerClick(e);
         }}
+        {...longPressBinder}
         onContextMenu={(e) => {
           handlePeerClick(e);
         }}
@@ -89,7 +94,7 @@ const Peer = ({ client, onTextSend, onFileSend }) => {
         <Flex
           direction={"column"}
           wrap={"wrap"}
-          style={{ height: "300px", overflow: "auto" }}
+          style={{ height: "300px", overflow: "auto", minWidth: "320px" }}
         >
           {files.map((file, index) => (
             <div key={index} style={{ margin: "10px" }}>
@@ -107,11 +112,14 @@ const Peer = ({ client, onTextSend, onFileSend }) => {
           >
             Cancel
           </div>
-          <div className="button__send" onClick={() => {
-            onFileSend(files, client);
-            setFiles([]);
-            clear();
-          }}>
+          <div
+            className="button__send"
+            onClick={() => {
+              onFileSend(files, client);
+              setFiles([]);
+              clear();
+            }}
+          >
             Send
           </div>
         </Flex>
@@ -150,6 +158,7 @@ const Peer = ({ client, onTextSend, onFileSend }) => {
               setOpenTextModal(false);
               setText("");
             }}
+            onKeyDown={() => {}}
           >
             Cancel
           </div>

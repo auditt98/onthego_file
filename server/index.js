@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 const wss = new Websocket.WebSocket.WebSocketServer({
   path: "/ws/_default",
   port: 8080,
+  maxPayload: 1024 * 1024 * 500, // 500 MB
 });
 
 const clients = {};
@@ -79,7 +80,7 @@ const handleTextReceive = (data) => {
     } else {
       recipientClient.ws.send(
         JSON.stringify({
-          type: "text",
+          type: object.type,
           data: {
             sender: sender,
             recipient: recipient,

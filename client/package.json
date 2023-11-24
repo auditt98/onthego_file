@@ -17,7 +17,8 @@
     "react-modal": "^3.16.1",
     "react-use-websocket": "^4.5.0",
     "tailwindcss-radix": "^2.8.0",
-    "use-file-picker": "^2.1.1"
+    "use-file-picker": "^2.1.1",
+    "use-long-press": "^3.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",

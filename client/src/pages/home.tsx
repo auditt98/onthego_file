@@ -44,6 +44,13 @@ function Home() {
   const [openReceiveTextModal, setOpenReceiveTextModal] = useState(
     false as boolean
   );
+  const [openReceiveFileModal, setOpenReceiveFileModal] = useState(
+    false as boolean
+  );
+  const [receivedFile, setReceivedFile] = useState({} as any);
+  const [receivedFileSender, setReceivedFileSender] = useState({} as any);
+  const [receivedFileMetadata, setReceivedFileMetadata] = useState({} as any);
+
   const [receivedText, setReceivedText] = useState("" as string);
   const [receivedTextSender, setReceivedTextSender] = useState({} as any);
   const [textCopied, setTextCopied] = useState(false as boolean);
@@ -88,7 +95,6 @@ function Home() {
         }
         setMessageHistory((prev) => prev.concat(lastMessage));
       } catch (error) {
-        console.log("lastMessage", lastMessage);
         const receivedData = await lastMessage.data.arrayBuffer();
         const decoder = new TextDecoder("utf-8");
         const content = decoder.decode(receivedData);
@@ -112,8 +118,10 @@ function Home() {
         // Extract the file content (remaining part of the buffer)
         const fileContent = receivedData.slice(metaDataEndIndex + 4); // +4 for the length of "\r\n\r\n"
         if (metaData) {
-          console.log("metadata", metaData);
-          console.log("file content", fileContent);
+          setReceivedFileSender(metaData.sender);
+          setReceivedFileMetadata(metaData);
+          setReceivedFile(fileContent);
+          setOpenReceiveFileModal(true);
         }
       }
     }
@@ -178,7 +186,6 @@ function Home() {
         recipient: client.id,
       };
       const sendData = await encodeData(file, metadata);
-      console.log("sendData", sendData);
       sendMessage(sendData);
       await waitForFileAck();
     }
@@ -214,7 +221,86 @@ function Home() {
           ))}
         </Flex>
       </Section>
-
+      {/* Receive file modal */}
+      <Modal
+        isOpen={openReceiveFileModal}
+        onAfterOpen={() => {}}
+        onRequestClose={() => {}}
+        style={customStyles}
+        overlayClassName="Overlay"
+        contentLabel="Receive File Modal"
+      >
+        <h3>
+          <span
+            style={{
+              color: "#2870BD",
+            }}
+          >
+            {receivedFileSender?.name}
+          </span>{" "}
+          sent you a file
+        </h3>
+        <Flex
+          direction={"column"}
+          wrap={"wrap"}
+          style={{ height: "300px", overflow: "auto", minWidth: "320px" }}
+        >
+          <div style={{ margin: "10px" }}>
+            <div>{receivedFileMetadata.name}</div>
+          </div>
+        </Flex>
+        <Flex gap={"9"} direction={"row"} justify={"end"} align={"end"}>
+          <div
+            className="button__cancel"
+            onKeyDown={() => {}}
+            onClick={() => {
+              setOpenReceiveFileModal(false);
+              sendJsonMessage({
+                type: "file_ack",
+                data: {
+                  text: "ack",
+                  sender: {
+                    id: selfId,
+                    name: selfName,
+                  },
+                  recipient: receivedFileSender.id,
+                },
+              });
+            }}
+          >
+            Ignore
+          </div>
+          <div
+            className="button__send"
+            onKeyDown={() => {}}
+            onClick={() => {
+              const blob = new Blob([receivedFile], {
+                type: receivedFileMetadata.type,
+              });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = receivedFileMetadata.name;
+              a.click();
+              setOpenReceiveFileModal(false);
+              sendJsonMessage({
+                type: "file_ack",
+                data: {
+                  text: "ack",
+                  sender: {
+                    id: selfId,
+                    name: selfName,
+                  },
+                  recipient: receivedFileSender.id,
+                },
+              });
+            }}
+          >
+            Download
+          </div>
+        </Flex>
+      </Modal>
+      {/* Receive text modal */}
       <Modal
         isOpen={openReceiveTextModal}
         onAfterOpen={() => {}}
