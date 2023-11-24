@@ -11,7 +11,8 @@ import useWebSocket, { ReadyState } from "react-use-websocket";
 import BackgroundCanvas from "../components/BackgroundCanvas";
 import Peer from "../components/Peer";
 import Modal from "react-modal";
-const WS_URL = "ws://localhost:8080/ws/_default";
+
+const WS_URL = "ws://54.169.73.192:9000/ws/_default";
 
 const CONN_STATUSES = {
   [ReadyState.CONNECTING]: "Connecting",
@@ -144,6 +145,8 @@ function Home() {
       },
     });
   };
+
+
 
   const encodeData = async (file, metadata) => {
     const enc = new TextEncoder();
